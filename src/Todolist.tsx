@@ -12,7 +12,7 @@ export type TaskType = {
 }
 
 
-export default function Todolist(props: PropsType) {
+export function Todolist(props: PropsType) {
     return (
         <div>
             <h3>{props.title}</h3>
