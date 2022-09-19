@@ -1,3 +1,7 @@
+body{
+  background-color: #919090;
+}
+
 .App {
   padding: 30px;
   display: flex;
