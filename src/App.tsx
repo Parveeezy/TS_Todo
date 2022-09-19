@@ -1,15 +1,14 @@
 import React, {useState} from 'react';
 import './App.css';
-import {Todolist, TaskType} from "./Todolist";
+import {TaskType, Todolist} from "./Todolist";
 
-
-export type FilterValuesType = 'all' | 'active' | 'completed'
+export type TasksValueType = 'all' | 'active' | 'completed'
 
 function App() {
 
-    const todoListTitle: string = 'What to learn';
+    const todoListTitle = 'What to learn?'
 
-    let [tasks, setTasks] = useState<Array<TaskType>>([
+    const [tasks, setTasks] = useState<Array<TaskType>>([
         {id: 1, title: 'HTML&CSS', isDone: true},
         {id: 2, title: 'JS', isDone: true},
         {id: 3, title: 'ReactJS', isDone: false},
@@ -18,36 +17,35 @@ function App() {
     ]);
 
     const removeTask = (taskId: number) => {
-        setTasks(tasks.filter((t) => t.id !== taskId))
+        setTasks(tasks.filter(t => t.id !== taskId))
     }
 
-    const [filter, setFilter] = useState<FilterValuesType>('all')
+    let taskForTodoList = tasks;
 
-    let tasksForTodoList = tasks;
+    const [filter, setFilter] = useState<TasksValueType>('all');
 
-    const changeFilter = (filter: FilterValuesType) => {
+    const changeFilter = (filter: TasksValueType) => {
         setFilter(filter)
     }
 
-    switch (filter){
+    switch (filter) {
         case "active":
-            tasksForTodoList = tasks.filter(t => !t.isDone);
+            taskForTodoList = tasks.filter(t => !t.isDone)
             break
         case "completed":
-            tasksForTodoList = tasks.filter(t => t.isDone)
-            break
+            taskForTodoList = tasks.filter(t => t.isDone)
     }
 
-    return (
-        <div className="App">
-
-            <Todolist tasks={tasksForTodoList}
-                      title={todoListTitle}
+    return(
+        <div className={'App'}>
+            <Todolist title={todoListTitle}
+                      tasks={taskForTodoList}
                       removeTask={removeTask}
                       changeFilter={changeFilter}
             />
         </div>
-    );
+    )
+
 }
 
 export default App;
