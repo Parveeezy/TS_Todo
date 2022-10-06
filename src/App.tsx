@@ -1,47 +1,63 @@
 import React, {useState} from 'react';
 import './App.css';
 import {TaskType, Todolist} from "./Todolist";
+import {v1} from "uuid";
 
-export type TasksValueType = 'all' | 'active' | 'completed'
+
+export type FilterValueType = 'all' | 'active' | 'completed';
 
 function App() {
 
-    const todoListTitle = 'What to learn?'
+    const todoListTitle = 'What to learn?';
 
     const [tasks, setTasks] = useState<Array<TaskType>>([
-        {id: 1, title: 'HTML&CSS', isDone: true},
-        {id: 2, title: 'JS', isDone: true},
-        {id: 3, title: 'ReactJS', isDone: false},
-        {id: 4, title: 'Redux', isDone: false},
-        {id: 5, title: 'RTK', isDone: false}
+        {id: v1(), title: 'HTML&CSS', isDone: true},
+        {id: v1(), title: 'JS', isDone: true},
+        {id: v1(), title: 'ReactJS', isDone: false},
+        {id: v1(), title: 'Redux', isDone: false},
+        {id: v1(), title: 'RTK', isDone: false}
     ]);
 
-    const removeTask = (taskId: number) => {
-        setTasks(tasks.filter(t => t.id !== taskId))
+    const removeTask = (taskId: string) => {
+        setTasks(tasks.filter(t => t.id !== taskId));
     }
 
-    let taskForTodoList = tasks;
 
-    const [filter, setFilter] = useState<TasksValueType>('all');
+    const [filter, setFilter] = useState<FilterValueType>('all');
 
-    const changeFilter = (filter: TasksValueType) => {
-        setFilter(filter)
+    const changeFilter = (filter: FilterValueType) => {
+        setFilter(filter);
     }
 
-    switch (filter) {
-        case "active":
-            taskForTodoList = tasks.filter(t => !t.isDone)
-            break
-        case "completed":
-            taskForTodoList = tasks.filter(t => t.isDone)
+    const addTask = (title: string) => {
+        const newTask: TaskType = {
+            id: v1(),
+            title: title,
+            isDone: false
+        }
+        setTasks([newTask, ...tasks]);
     }
 
-    return(
+    const getFilteredTasks = (t: TaskType[], f: FilterValueType) => {
+        let taskForTodoList = tasks;
+        switch (f) {
+            case "active":
+                taskForTodoList = t.filter(t => !t.isDone);
+                break
+            case "completed":
+                taskForTodoList = t.filter(t => t.isDone);
+        }
+        return taskForTodoList;
+    }
+
+
+    return (
         <div className={'App'}>
             <Todolist title={todoListTitle}
-                      tasks={taskForTodoList}
+                      tasks={getFilteredTasks(tasks, filter)}
                       removeTask={removeTask}
                       changeFilter={changeFilter}
+                      addTask={addTask}
             />
         </div>
     )
