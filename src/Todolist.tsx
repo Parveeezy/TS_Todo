@@ -5,65 +5,82 @@ export type TaskType = {
     id: string
     title: string
     isDone: boolean
-}
+};
 export type TodolistPropsType = {
+    todoListId: string
     title: string
     tasks: TaskType[]
     filter: FilterValueType
-    removeTask: (taskId: string) => void
-    changeFilter: (filter: FilterValueType) => void
-    addTask: (title: string) => void
-    changeTaskStatus: (id: string, isDone: boolean) => void
-}
+    removeTask: (taskId: string, todoListId: string) => void
+    changeTodoListFilter: (filter: FilterValueType, todoListId: string) => void
+    addTask: (title: string, todoListId: string) => void
+    changeTaskStatus: (taskId: string, isDone: boolean, todoListId: string) => void
+    removeTodoList: (todoListId: string) => void
+};
 
 export function Todolist(props: TodolistPropsType) {
 
-    let [title, setTitle] = useState<string>('')
-    const [error, setError] = useState<boolean>(false)
+    let [title, setTitle] = useState<string>('');
+    const [error, setError] = useState<boolean>(false);
 
-    const handlerCreator = (filter: FilterValueType) => () => props.changeFilter(filter)
+    const handlerCreator = (filter: FilterValueType) => {
+        return () => props.changeTodoListFilter(filter, props.todoListId)
+    };
 
-    const tasksList = props.tasks.length ?
-        props.tasks.map(t => {
-            const removeTask = () => props.removeTask(t.id)
-            const changeTaskStatus = (e: ChangeEvent<HTMLInputElement>) => props.changeTaskStatus(t.id, e.currentTarget.checked)
+    const getTaskListItem = (t: TaskType) => {
 
-            return (
-                <li key={t.id} className={t.isDone ? 'isDone' : ''}>
-                    <input
-                        type="checkbox"
-                        checked={t.isDone}
-                        onChange={changeTaskStatus}
-                    />
-                    <span>{t.title}</span>
-                    <button onClick={removeTask}>x</button>
-                </li>
-            )
-        })
-        :
-        <span>Список пуст...</span>
+        const removeTask = () => props.removeTask(t.id, props.todoListId);
+        const changeTaskStatus = (e: ChangeEvent<HTMLInputElement>) =>
+            props.changeTaskStatus(t.id, e.currentTarget.checked, props.todoListId);
+
+        return (
+            <li key={t.id} className={t.isDone ? 'isDone' : ''}>
+                <input
+                    type="checkbox"
+                    checked={t.isDone}
+                    onChange={changeTaskStatus}
+                />
+                <span>{t.title}</span>
+                <button onClick={removeTask}>x</button>
+            </li>
+        )
+    }
+
+    const tasksList = props.tasks.length
+        ? <ul>{props.tasks.map(getTaskListItem)}</ul>
+        : <span>Список пуст...</span>
 
     const addTaskHandler = () => {
-        const trimmedTitle = title.trim()
+        const trimmedTitle = title.trim();
         if (trimmedTitle !== '') {
-            props.addTask(trimmedTitle)
+            props.addTask(trimmedTitle, props.todoListId);
         } else {
-            setError(true)
+            setError(true);
         }
-        setTitle('')
-    }
+        setTitle('');
+    };
 
     const onChangeInputHandler = (event: ChangeEvent<HTMLInputElement>) => {
         error && setError(false)
         setTitle(event.currentTarget.value);
-    }
-    const onEnterDownAddTask = (event: KeyboardEvent<HTMLInputElement>) => event.key === 'Enter' && addTaskHandler()
-    const errorMessage = error ? <div className={'errorMessage'}>Поле ввода не может быть пустым...</div> : null
+    };
+
+    const onEnterDownAddTask = (event: KeyboardEvent<HTMLInputElement>) =>
+        event.key === 'Enter' && addTaskHandler();
+
+    const removeTodoList = () => props.removeTodoList(props.todoListId);
+
+    const errorMessage = error
+        ? <div className={'errorMessage'}>Поле ввода не может быть пустым...</div>
+        : null
 
     //Возвращение JSX разметки
     return (
         <div>
-            <h2>{props.title}</h2>
+            <h2>
+                {props.title}
+                <button onClick={removeTodoList}>x</button>
+            </h2>
             <div>
                 <input
                     className={error ? 'error' : ''}
