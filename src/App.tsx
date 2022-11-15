@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import './App.css';
 import {TaskType, Todolist} from "./Todolist";
 import {v1} from "uuid";
+import AddItemForm from "./AddItemForm";
 
 export type FilterValueType = 'all' | 'active' | 'completed';
 
@@ -87,6 +88,27 @@ function App() {
         }
         return taskForTodoList;
     };
+    const addTodoList = (title: string,) => {
+        const newTodoListId = v1();
+        const newTodoList: TodoListType = {
+            id: newTodoListId,
+            title: title,
+            filter: "all"
+        }
+        setTodoLists([...todoLists, newTodoList])
+        setTasks({...tasks, [newTodoListId]: []})
+    }
+    const changeTaskTitle = (taskId: string, title: string, todoListId: string) => {
+        setTasks({...tasks, //делаем копию объекта
+            [todoListId]: tasks[todoListId] // внутри объекта цепляем конкретный массив [todoListId] и возьмем тот массив, который был и мапаем
+                .map(t => t.id === taskId
+                    ? {...t, title: title}
+                    : t)
+        })
+    }
+    const changeTodoListTitle = (title: string, todoListId: string) => {
+        setTodoLists(todoLists.map(t => t.id === todoListId ? {...t, title: title} : t));
+    };
 
     const todoListComponents = todoLists.map(tl => {
         return (
@@ -102,12 +124,16 @@ function App() {
                 removeTodoList={removeTodoList}
                 changeTaskStatus={changeTaskStatus}
                 changeTodoListFilter={changeTodoListFilter}
+                addTodoList={addTodoList}
+                changeTaskTitle={changeTaskTitle}
+                changeTodoListTitle={changeTodoListTitle}
             />
         )
     })
 
     return (
         <div className={'App'}>
+            <AddItemForm addItem={addTodoList}/>
             {todoListComponents}
         </div>
     )

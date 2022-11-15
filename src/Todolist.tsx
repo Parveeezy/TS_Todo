@@ -1,5 +1,7 @@
 import React, {ChangeEvent, useState, KeyboardEvent} from "react";
 import {FilterValueType} from "./App";
+import AddItemForm from "./AddItemForm";
+import EditableSpan from "./EditableSpan";
 
 export type TaskType = {
     id: string
@@ -16,22 +18,24 @@ export type TodolistPropsType = {
     addTask: (title: string, todoListId: string) => void
     changeTaskStatus: (taskId: string, isDone: boolean, todoListId: string) => void
     removeTodoList: (todoListId: string) => void
+    addTodoList: (title: string) => void
+    changeTaskTitle: (taskId: string, title: string, todoListId: string) => void
+    changeTodoListTitle: (title: string, todoListId: string) => void
 };
 
 export function Todolist(props: TodolistPropsType) {
 
-    let [title, setTitle] = useState<string>('');
-    const [error, setError] = useState<boolean>(false);
-
     const handlerCreator = (filter: FilterValueType) => {
         return () => props.changeTodoListFilter(filter, props.todoListId)
     };
-
     const getTaskListItem = (t: TaskType) => {
 
         const removeTask = () => props.removeTask(t.id, props.todoListId);
         const changeTaskStatus = (e: ChangeEvent<HTMLInputElement>) =>
             props.changeTaskStatus(t.id, e.currentTarget.checked, props.todoListId);
+
+        const chageTaskTitle = (title: string) =>
+            props.changeTaskTitle(t.id, title, props.todoListId)
 
         return (
             <li key={t.id} className={t.isDone ? 'isDone' : ''}>
@@ -40,7 +44,8 @@ export function Todolist(props: TodolistPropsType) {
                     checked={t.isDone}
                     onChange={changeTaskStatus}
                 />
-                <span>{t.title}</span>
+                {/*<span>{t.title}</span>*/}
+                <EditableSpan title={t.title} changeTitle={chageTaskTitle}/>
                 <button onClick={removeTask}>x</button>
             </li>
         )
@@ -50,47 +55,22 @@ export function Todolist(props: TodolistPropsType) {
         ? <ul>{props.tasks.map(getTaskListItem)}</ul>
         : <span>Список пуст...</span>
 
-    const addTaskHandler = () => {
-        const trimmedTitle = title.trim();
-        if (trimmedTitle !== '') {
-            props.addTask(trimmedTitle, props.todoListId);
-        } else {
-            setError(true);
-        }
-        setTitle('');
+    const addTaskHandler = (title: string) => {
+        props.addTask(title, props.todoListId)
     };
-
-    const onChangeInputHandler = (event: ChangeEvent<HTMLInputElement>) => {
-        error && setError(false)
-        setTitle(event.currentTarget.value);
-    };
-
-    const onEnterDownAddTask = (event: KeyboardEvent<HTMLInputElement>) =>
-        event.key === 'Enter' && addTaskHandler();
-
     const removeTodoList = () => props.removeTodoList(props.todoListId);
-
-    const errorMessage = error
-        ? <div className={'errorMessage'}>Поле ввода не может быть пустым...</div>
-        : null
+    const changeTodoListTitle = (title: string) => {
+    props.changeTodoListTitle(title, props.todoListId)
+    }
 
     //Возвращение JSX разметки
     return (
         <div>
             <h2>
-                {props.title}
+                <EditableSpan title={props.title} changeTitle={changeTodoListTitle} />
                 <button onClick={removeTodoList}>x</button>
             </h2>
-            <div>
-                <input
-                    className={error ? 'error' : ''}
-                    value={title}
-                    onChange={onChangeInputHandler}
-                    onKeyDown={onEnterDownAddTask}
-                />
-                <button onClick={addTaskHandler}>+</button>
-                {errorMessage}
-            </div>
+            <AddItemForm addItem={addTaskHandler}/>
             <ul>
                 {tasksList}
             </ul>
